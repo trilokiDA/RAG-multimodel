@@ -1,0 +1,23 @@
+# Environment variables
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary test/debug files
+check.txt
+output.txt
+pipeline_test.txt
+test_out.txt
+output.log
+test_incremental.py
+
+# Vector Store
+chroma_db/
+test_chroma_db/
+
+# Extracted Assets
+extracted_images/
+test_data/

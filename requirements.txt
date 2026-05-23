@@ -1,0 +1,14 @@
+langchain
+langchain-community
+langchain-groq
+langgraph
+chromadb
+unstructured
+unstructured[pdf]
+unstructured[docx]
+unstructured[pptx]
+rank-bm25
+sentence-transformers
+pydantic
+python-dotenv
+unstructured-inference

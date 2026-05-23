@@ -42,8 +42,11 @@ class RetrievalPipeline:
         # Step 2: Rerank the retrieved documents
         print(f"Reranking documents...")
         reranked_docs = self.document_reranker.rerank(query, retrieved_docs, self.rerank_top_n)
-        print(f"Returning top {len(reranked_docs)} reranked documents.")
         
+        # Debug Logging
+        for i, doc in enumerate(reranked_docs):
+            print(f"Reranked Result {i+1}: Source={doc.metadata.get('source')}, Page={doc.metadata.get('page')}, Type={doc.metadata.get('element_type')}, Content={doc.page_content[:100]}...")
+
         return reranked_docs
 
 if __name__ == "__main__":

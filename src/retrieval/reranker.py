@@ -19,6 +19,11 @@ class DocumentReranker:
         # Get scores from the reranker model
         scores = self.reranker_model.predict(pairs)
 
+        # Apply a boost for multimodal documents to help them surface
+        for i, doc in enumerate(documents):
+            if doc.metadata.get("is_multimodal"):
+                scores[i] += 0.5 # Small boost to increase chance of inclusion
+
         # Combine documents with their scores and sort in descending order
         scored_documents = sorted(zip(documents, scores), key=lambda x: x[1], reverse=True)
 

@@ -22,7 +22,7 @@ def setup_rag_pipeline(data_dir: str = "data", chroma_persist_dir: str = "./chro
     retrieval_pipeline = RetrievalPipeline(
         documents=[], 
         chroma_persist_dir=chroma_persist_dir,
-        retrieval_k=5, # Example: retrieve top 5 initially
+        retrieval_k=10, # Increased from 5 to retrieve more candidates
         rerank_top_n=3 # Example: rerank to top 3
     )
     return retrieval_pipeline
@@ -72,6 +72,13 @@ if __name__ == "__main__":
         
         # Invoke the graph
         inputs = {"question": question}
-        for s in app.stream(inputs):
-            print(s)
-            print("---")
+        result = app.invoke(inputs)
+        
+        print("\n---ANSWER---")
+        print(result["generation"])
+        
+        if result.get("image_paths"):
+            print("\n---IMAGE PATHS---")
+            for path in result["image_paths"]:
+                print(path)
+        print("\n---")

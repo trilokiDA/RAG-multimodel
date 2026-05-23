@@ -18,7 +18,7 @@ class DocumentLoader:
     def _extract_images_from_pdf(self, file_path: str) -> List[Document]:
         """
         Extracts images from a PDF using PyMuPDF and returns a list of Documents 
-        containing the image paths.
+        containing the image paths and relevant page text.
         """
         multimodal_docs = []
         doc_name = os.path.basename(file_path).split('.')[0]
@@ -27,6 +27,7 @@ class DocumentLoader:
             pdf_document = fitz.open(file_path)
             for page_index in range(len(pdf_document)):
                 page = pdf_document[page_index]
+                page_text = page.get_text()[:500] # Get first 500 chars of page text for context
                 image_list = page.get_images(full=True)
                 
                 for image_index, img in enumerate(image_list):
@@ -42,9 +43,9 @@ class DocumentLoader:
                         f.write(image_bytes)
                     
                     description = (
-                        f"This is an image extracted from {file_path} on page {page_index + 1}. "
-                        f"It is stored at {image_path}. This image may contain relevant charts, "
-                        f"tables, or diagrams mentioned on this page."
+                        f"Image located on page {page_index + 1} of {file_path}. "
+                        f"Associated page text summary: {page_text} "
+                        f"File path: {image_path}."
                     )
                     
                     multimodal_docs.append(Document(

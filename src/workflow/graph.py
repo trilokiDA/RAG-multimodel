@@ -18,10 +18,12 @@ class GraphState(TypedDict):
         question: The user's question
         documents: List of retrieved documents
         generation: The LLM generation
+        image_paths: List of relevant image paths
     """
     question: str
     documents: Annotated[List[Document], operator.add]
     generation: str
+    image_paths: List[str]
 
 def retrieve(state: GraphState, retrieval_pipeline: RetrievalPipeline):
     """
@@ -43,7 +45,7 @@ def generate(state: GraphState):
     # Enhanced Prompt for structured output
     prompt = ChatPromptTemplate.from_messages([
         ("system", (
-            "You are an expert financial and data analyst assistant. "
+            "You are an expert assistant. "
             "Use the provided context to answer the user's question with high precision. "
             "\n\nFOLLOW THESE FORMATTING RULES:"
             "\n1. Use professional Markdown formatting."
@@ -53,12 +55,12 @@ def generate(state: GraphState):
             "\n5. Use bullet points for lists."
             "\n6. If the answer is not in the context, state clearly that the information is missing."
             "\n7. Keep the tone professional and objective."
+            "\n8. If referencing visuals, rely strictly on the metadata of provided images (source file and page number). Do NOT infer or guess figure labels (e.g., 'Figure 4.4') from the text content unless explicitly stated in the context."
         )),
         ("user", "Question: {question}\n\nContext:\n{context}")
     ])
 
     # Groq LLM
-    # Note: Ensure the model name is correct for your Groq setup (e.g., 'llama3-70b-8192')
     llm = ChatGroq(temperature=0, model_name="openai/gpt-oss-120b", api_key=os.getenv("GROQ_API_KEY"))
 
     # Chain
@@ -66,13 +68,7 @@ def generate(state: GraphState):
 
     generation = rag_chain.invoke({"context": documents, "question": question})
     
-    # Check for multimodal documents and append info
-    image_paths = [doc.metadata.get("image_path") for doc in documents if doc.metadata.get("is_multimodal") and doc.metadata.get("image_path")]
+    # Extract image paths
+    image_paths = list(set([doc.metadata.get("image_path") for doc in documents if doc.metadata.get("is_multimodal") and doc.metadata.get("image_path")]))
     
-    final_response = generation.content
-    if image_paths:
-        final_response += "\n\n## 🖼️ Relevant Visuals Found"
-        for path in set(image_paths):
-            final_response += f"\n- **Source Image:** `{path}`"
-
-    return {"documents": documents, "question": question, "generation": final_response}
+    return {"documents": documents, "question": question, "generation": generation.content, "image_paths": image_paths}

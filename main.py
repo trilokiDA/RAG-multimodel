@@ -7,7 +7,12 @@ from src.retrieval.pipeline import RetrievalPipeline
 from src.workflow.graph import GraphState, retrieve, generate
 from dotenv import load_dotenv
 
+# Caching imports
+from langchain_core.globals import set_llm_cache
+from langchain_community.cache import InMemoryCache
+
 load_dotenv() # Load environment variables
+set_llm_cache(InMemoryCache()) # Enable in-memory caching for LLM responses
 
 def setup_rag_pipeline(data_dir: str = "data", chroma_persist_dir: str = "./chroma_db"):
     """
